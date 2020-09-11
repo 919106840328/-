@@ -1,17 +1,16 @@
 #include "calculator.h"
 #include<iostream>
 using namespace std;
-#include<stack>
-#include<vector>
-#include<cstdlib>
-#include<limits.h>
-#pragma execution_character_set("utf-8")
-bool isNum(char ch);
-bool isoper(char ch);
-int level(char ch);
-double scd(string s);
-double getValue(vector<string> V);
-vector<string> midToPost(string s);
+#include<stack>//堆
+#include<vector>//容器
+#include<cstdlib>//转换
+#include<limits.h>//限制
+bool isNum(char ch);//判断数字
+bool isoper(char ch);//判断操作
+int level(char ch);//判断优先级
+double scd(string s);//字符串转字符组
+double getValue(vector<string> V);//计算
+vector<string> midToPost(string s);//转表达式
 
 calculator::calculator(QWidget *parent)
     : QMainWindow(parent)
@@ -30,6 +29,7 @@ calculator::calculator(QWidget *parent)
     eight=new QPushButton("8");
     nine=new QPushButton("9");
     dec=new QPushButton(".");
+    binhex=new QPushButton("bin/hex");
 
     add=new QPushButton("+");
     sub=new QPushButton("-");
@@ -72,6 +72,7 @@ calculator::calculator(QWidget *parent)
     H->addWidget(dec,4,1);
     H->addWidget(le,4,2);
     H->addWidget(ri,4,3);
+    H->addWidget(binhex,4,4);
 
     widget->setLayout(H);
 
@@ -95,6 +96,9 @@ calculator::calculator(QWidget *parent)
     connect(le,SIGNAL(clicked(bool)),this,SLOT(butlef()));
     connect(ri,SIGNAL(clicked(bool)),this,SLOT(butri()));
     connect(equ,SIGNAL(clicked()),this,SLOT(butequ()));
+    connect(binhex,SIGNAL(clicked()),this,SLOT(changewin()));
+    connect(&w,&SubWidget::mySignal,this,&calculator::dealSub);
+    this->setWindowTitle("基本计算器");
 }
 void calculator::butzero(){
     if(input=="0")
@@ -237,8 +241,16 @@ void calculator::butequ(){
 
     }
 }
+void calculator::changewin(){
+    w.show();
+    this->hide();
+}
+void calculator::dealSub(){
+    w.hide();
+    this->show();
+}
 bool isNum(char ch){
-    if(ch>='0'&&ch<='9')
+    if((ch>='0'&&ch<='9')||(ch>='A'&&ch<='F'))
         return true;
     else return false;
 }
@@ -280,12 +292,12 @@ int level(char ch){
     continue;
     else return INT_MAX;
     }
-    double result=atof(s.c_str());
+    double result=atof(s.c_str());//字符串转数字
     return result;
     }
     vector<string> midToPost(string s) {
-        stack<char> S;
-        vector<string> V;
+        stack<char> S;//存放临时符号的栈
+        vector<string> V;//返回后缀表达式
         int i = 0;
         while(i < s.length()) {
             if(isNum(s[i])) {
@@ -295,7 +307,7 @@ int level(char ch){
                     i++;
                 }
                 V.push_back(str);
-            }
+            }//数字入容器
 
             else if(isoper(s[i])){
                 if(s[i] == '-' && (i == 0 || !isNum(s[i-1]))) {
@@ -303,7 +315,7 @@ int level(char ch){
                     while(isNum(s[i]) || s[i] == '.') {
                         str += s[i]; i++;
                     }
-                    V.push_back(str);
+                    V.push_back(str);//负数的情况
                 }else{
                     if(S.empty()){
                         S.push(s[i]); i++;
@@ -315,7 +327,7 @@ int level(char ch){
                                 str += S.top();
                                 V.push_back(str);
                                 S.pop();
-                            }
+                            }//判断优先级入栈
                             if(S.top() == '(') S.pop(); i++;
                         } else {
                             while(!S.empty() && initial <= level(S.top()) && level(S.top()) != 5) {
@@ -339,20 +351,20 @@ int level(char ch){
             string str = ""; str += S.top();
             S.pop();
             V.push_back(str);
-        }
+        }//将栈中剩余运算符入容器
         //for(int i = 0; i < V.size(); i++) cout << V[i] << "[]";
         return V;
     }
 
     double getValue(vector<string> V) {
-        stack<double> S;
+        stack<double> S;//存放临时结果
         for(int i = 0; i < V.size(); i++) {
             if(V[i].length() == 1 && isoper(V[i][0])) {
                 double a = 0, b = 0;
                 if(!S.empty()) {
                     a = S.top(); S.pop();
                 }else return INT_MAX;
-
+//判断表达式
                 if(!S.empty()) {
                     b = S.top(); S.pop();
                 }else return INT_MAX;
@@ -379,7 +391,7 @@ int level(char ch){
             }
         }
         if(S.empty()) return INT_MAX;
-
+//计算
         double value = S.top();
         S.pop();
         return value;

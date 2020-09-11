@@ -10,6 +10,7 @@
 #include<QVBoxLayout>
 #include<QGridLayout>
 #include<iterator>
+#include<subwidget.h>
 class calculator : public QMainWindow
 {
     Q_OBJECT
@@ -17,6 +18,7 @@ class calculator : public QMainWindow
 public:
     calculator(QWidget *parent = 0);
     ~calculator();
+
 private:
     QLineEdit *inputline;
     QString input="0";
@@ -31,7 +33,7 @@ private:
     QPushButton *seven;
     QPushButton *eight;
     QPushButton *nine;//0-9
-
+    QPushButton *binhex;
     QPushButton *add;
     QPushButton *sub;
     QPushButton *div;
@@ -39,7 +41,7 @@ private:
     QPushButton *dec;
     QPushButton *equ;
     //+-...
-
+    SubWidget w;
     QPushButton *CE;
     QPushButton *AC;
     QPushButton *le;
@@ -68,6 +70,8 @@ private slots:
     void butri();
     void butCE();
     void butAC();
+    void changewin();
+    void dealSub();
 };
 
 #endif // CALCULATOR_H
